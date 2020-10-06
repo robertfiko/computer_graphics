@@ -54,5 +54,7 @@ protected:
 		glm::vec3 p;
 		glm::vec3 c;
 	};
+
+	float time;
 };
 

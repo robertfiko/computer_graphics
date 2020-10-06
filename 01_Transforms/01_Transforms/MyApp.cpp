@@ -152,10 +152,15 @@ void CMyApp::Clean()
 
 void CMyApp::Update()
 {
+	time = SDL_GetTicks() / 1000.0f;
+	float coor = sinf(time*3);
+
 	// nézeti transzformáció beállítása
-	m_matView = glm::lookAt(glm::vec3( 0,  0,  5),		// honnan nézzük a színteret
+	m_matView = glm::lookAt(glm::vec3( 0,  coor,  5),		// honnan nézzük a színteret
 							glm::vec3( 0,  0,  0),		// a színtér melyik pontját nézzük
 							glm::vec3( 0,  1,  0));		// felfelé mutató irány a világban
+
+	//std::cout << "update";
 }
 
 
