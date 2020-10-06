@@ -32,14 +32,14 @@ bool CMyApp::Init()
 	{ 
 		// 1. háromszög
 		//          x,  y, z             R, G, B
-		{glm::vec3(-1, -1, 0), glm::vec3(1, 0, 0)},
-		{glm::vec3( 1, -1, 0), glm::vec3(0, 1, 0)},
+		{glm::vec3(-1, 0, 1), glm::vec3(1, 0, 0)},
+		{glm::vec3(1, 0, 0), glm::vec3(0, 1, 0)},
 		{glm::vec3(-1,  1, 0), glm::vec3(0, 0, 1)},
 
 		// 2. háromszög
 		{glm::vec3(-1,  1, 0), glm::vec3(0, 0, 1)},
-		{glm::vec3( 1, -1, 0), glm::vec3(0, 1, 0)},
-		{glm::vec3( 1,  1, 0), glm::vec3(1, 1, 1)},
+		{glm::vec3(1, -1, 0), glm::vec3(0, 1, 0)},
+		{glm::vec3(1,  1, 0), glm::vec3(1, 1, 1)},
 	};
 
 	// 1 db VAO foglalasa
