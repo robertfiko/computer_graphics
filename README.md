@@ -1,1 +1,1 @@
-# computer_graphics
+# Computer Graphics Lab - ELTE Faculty of Informatics (Studies)
