@@ -9,6 +9,8 @@ This is the GitHub repo for my computer graphics lab lectures. All files are **f
  - Visual Studio 2019
  - SDL
  - OpenGL
+ - subst T: C:/ **do it after every restart, when you wish to work**
+ 
 
 ## Subject's offical site
 
