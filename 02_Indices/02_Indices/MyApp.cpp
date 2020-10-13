@@ -22,8 +22,8 @@ bool CMyApp::Init()
 	// törlési szín legyen kékes
 	glClearColor(0.125f, 0.25f, 0.5f, 1.0f);
 
-	glEnable(GL_CULL_FACE); // kapcsoljuk be a hatrafele nezo lapok eldobasat
-	glEnable(GL_DEPTH_TEST); // mélységi teszt bekapcsolása (takarás)
+	//glEnable(GL_CULL_FACE); // kapcsoljuk be a hatrafele nezo lapok eldobasat
+	//glEnable(GL_DEPTH_TEST); // mélységi teszt bekapcsolása (takarás)
 	glCullFace(GL_BACK); // GL_BACK: a kamerától "elfelé" nézõ lapok, GL_FRONT: a kamera felé nézõ lapok
 
 	//
@@ -37,6 +37,9 @@ bool CMyApp::Init()
 		{glm::vec3( 1, -1, 0), glm::vec3(0, 1, 0)},
 		{glm::vec3(-1,  1, 0), glm::vec3(0, 0, 1)},
 		{glm::vec3( 1,  1, 0), glm::vec3(1, 1, 1)},
+
+		{glm::vec3(3, -1, 0), glm::vec3(1, 0, 0)},
+		{glm::vec3(3,  1, 0), glm::vec3(0, 0, 1)},
 	};
 
 	// indexpuffer adatai
@@ -46,7 +49,21 @@ bool CMyApp::Init()
         0,1,2,
 		// 2. háromszög
         2,1,3,
-    };
+
+		//FELADAT: jobb oldalt egy  másik négyzet rajzolása
+		//3. triangle
+
+		1, 4, 3, // fehér , piros sarok (új), eredeeti fehér
+
+		//4. triangle
+		4, 5, 3  //piros, kék, fehér
+
+	};
+
+
+	
+
+
 
 	// 1 db VAO foglalasa
 	glGenVertexArrays(1, &m_vaoID);
@@ -88,6 +105,7 @@ bool CMyApp::Init()
 	glGenBuffers(1, &m_ibID);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ibID);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
 
 	glBindVertexArray(0); // feltöltüttük a VAO-t, kapcsoljuk le
 	glBindBuffer(GL_ARRAY_BUFFER, 0); // feltöltöttük a VBO-t is, ezt is vegyük le
@@ -202,7 +220,7 @@ void CMyApp::Render()
 
 	// kirajzolás
 	glDrawElements(	GL_TRIANGLES,		// primitív típus
-					6,					// hany csucspontot hasznalunk a kirajzolashoz
+					12,					// hany csucspontot hasznalunk a kirajzolashoz
 					GL_UNSIGNED_SHORT,	// indexek tipusa
 					0);					// indexek cime
 
