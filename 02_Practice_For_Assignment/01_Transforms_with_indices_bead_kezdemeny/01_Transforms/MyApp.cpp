@@ -31,7 +31,7 @@ bool CMyApp::Init()
 
 	Vertex vert[] =
 	{
-		//1. Négyzet - szemben
+		//1. Négyzet
 		// 1. háromszög
 		//          x,  y, z             R, G, B
 		{glm::vec3(-1, -1, 2), glm::vec3(0, 0, 0)},
@@ -43,17 +43,43 @@ bool CMyApp::Init()
 		{glm::vec3(-1, -1, 0), glm::vec3(1, 1, 0)},
 		{glm::vec3(1, -1, 0), glm::vec3(1, 0, 1)},
 		{glm::vec3(-1,  1, 0), glm::vec3(0, 1, 1)},
-		{glm::vec3(1,  1, 0), glm::vec3(1, 1, 1)}
+		{glm::vec3(1,  1, 0), glm::vec3(1, 1, 1)},
+
+		//Kieg. 2. kocka
+		//          x,  y, z             R, G, B
+		{glm::vec3(1, -3, 2), glm::vec3(1, 1, 0)},
+		{glm::vec3(3, -3, 2), glm::vec3(1, 0, 1)},
+		{glm::vec3(3,  -1, 2), glm::vec3(0, 1, 1)},
+		{glm::vec3(1,  -3, 0), glm::vec3(1, 1, 1)},
+
+		//          x,  y, z             R, G, B
+		{glm::vec3(3, -1, 0), glm::vec3(1, 1, 0)},
+		{glm::vec3(3, -3, 0), glm::vec3(1, 0, 1)}
+		
 
 	};
 
 	GLushort indices[] = {
+		//KÖZÉPSÕ
 		0, 1, 2, 2, 1, 3,
 		1, 5, 3, 3, 5, 7,
 		5, 4, 7, 7, 4, 6,
 		4, 0, 6, 6, 0, 2,
 		4, 5, 0, 0, 5, 1,
-		2, 3, 6, 6, 3, 7
+		2, 3, 6, 6, 3, 7,
+
+		//JOBB ALSÓ
+		8, 9, 1, 1, 9, 10,
+		9, 13, 10, 10, 13, 12,
+		1, 10, 5, 5, 10, 12,
+		1, 5, 8, 8, 5, 11,
+		5, 12, 11, 11, 12, 13,
+		8, 11, 9, 9, 11, 13
+
+
+
+
+
 	};
 
 	// 1 db VAO foglalasa
@@ -180,8 +206,8 @@ void CMyApp::Clean()
 void CMyApp::Update()
 {
 
-	m_matView = glm::lookAt(glm::vec3(0, 10, 10),		// honnan nézzük a színteret
-		glm::vec3(0, 0, 2),		// a színtér melyik pontját nézzük
+	m_matView = glm::lookAt(glm::vec3(10, 0, 20),		// honnan nézzük a színteret
+		glm::vec3(0, 0, 0),		// a színtér melyik pontját nézzük
 		glm::vec3(0, 1, 0));		// felfelé mutató irány a világban
 
 
@@ -206,34 +232,69 @@ void CMyApp::Render()
 		glm::scale<float>( glm::vec3(s_x, s_y, s_z) ) <- léptékezés
 
 	*/
-	float time = SDL_GetTicks() / 1000.0;
-	m_matWorld = glm::mat4(1.0f);
-	m_matWorld =
-		glm::rotate<float>(time*M_PI*2/3, glm::vec3(0, 1, 0)) *
-		glm::translate<float>(glm::vec3(5, 0, 0)) * //kitol
-		glm::rotate<float>(time*M_PI*2*(5/12), glm::vec3(-1,0,0)) *
-		glm::translate<float>(glm::vec3(0, 0, -1))  //hátratol
-		
-
-		;
-
-
-	// majd küldjük át a megfelelõ mátrixokat!
-	glUniformMatrix4fv( m_loc_world,// erre a helyre töltsünk át adatot
-						1,			// egy darab mátrixot
-						GL_FALSE,	// NEM transzponálva
-						&(m_matWorld[0][0]) ); // innen olvasva a 16 x sizeof(float)-nyi adatot
-	glUniformMatrix4fv( m_loc_view,  1, GL_FALSE, &( m_matView[0][0]) );
-	glUniformMatrix4fv( m_loc_proj,  1, GL_FALSE, &( m_matProj[0][0]) );
+	glUniformMatrix4fv(m_loc_view, 1, GL_FALSE, &(m_matView[0][0]));
+	glUniformMatrix4fv(m_loc_proj, 1, GL_FALSE, &(m_matProj[0][0]));
 
 	// kapcsoljuk be a VAO-t (a VBO jön vele együtt)
 	glBindVertexArray(m_vaoID);
 
-	// kirajzolás
-	glDrawElements(	GL_TRIANGLES,	// rajzoljunk ki háromszöglista primitívet
-					36,				
-					GL_UNSIGNED_SHORT,
-					0);			
+	float time = SDL_GetTicks() / 1000.0;
+	m_matWorld = glm::mat4(1.0f);
+
+
+	/*
+	for (int i = 0; i < 10; i++) {
+		m_matWorld =
+			glm::rotate<float>(time*M_PI*2/3, glm::vec3(0, 1, 0)) *
+			glm::translate<float>(glm::vec3(5, 0, 0)) * //kitol
+			glm::rotate<float>(time*M_PI*2*(5/12), glm::vec3(-1,0,0)) *
+			glm::translate<float>(glm::vec3(0, 0, -1))  //hátratol*/
+			/*glm::rotate<float>(time * M_PI / 4, glm::vec3(0, 1, 0)) 
+			glm::rotate<float>(i * M_PI*2 / 10.0, glm::vec3(0, 1, 0)) *
+			glm::translate<float>(glm::vec3(5, 0, 0)) *
+			glm::translate<float>(glm::vec3(0, 0, -1));
+
+
+
+			glUniformMatrix4fv(m_loc_world,// erre a helyre töltsünk át adatot
+				1,			// egy darab mátrixot
+				GL_FALSE,	// NEM transzponálva
+				&(m_matWorld[0][0])); // innen olvasva a 16 x sizeof(float)-nyi adatot
+
+			glDrawElements(GL_TRIANGLES,	// rajzoljunk ki háromszöglista primitívet
+				36,
+				GL_UNSIGNED_SHORT,
+				0);
+
+
+			
+	}*/
+
+
+
+
+	//X RAJZOLÁS
+
+	//középsõ
+	m_matWorld = 
+		
+				//glm::rotate<float>(M_PI*time,glm::vec3(0,1,0))*
+		glm::translate<float>(glm::vec3(5, 0, 0))* //kitol
+				glm::scale<float>(glm::vec3(fabs(sinf(time))*1.5+0.5, 1, 1)) *
+		
+
+				glm::translate<float>(glm::vec3(0, 0, -1));  //hátratol*/
+		
+	glUniformMatrix4fv(m_loc_world, 1, GL_FALSE, &(m_matWorld[0][0])); 
+	glDrawElements(GL_TRIANGLES, 72, GL_UNSIGNED_SHORT, 0);
+
+	
+
+
+
+
+
+
 
 	// VAO kikapcsolasa
 	glBindVertexArray(0);
