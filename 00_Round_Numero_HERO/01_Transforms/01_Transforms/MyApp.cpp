@@ -22,7 +22,7 @@ bool CMyApp::Init()
 
 	glEnable(GL_CULL_FACE); // kapcsoljuk be a hatrafele nezo lapok eldobasat
 	glEnable(GL_DEPTH_TEST); // mélységi teszt bekapcsolása (takarás)
-	glCullFace(GL_BACK); // GL_BACK: a kamerától "elfelé" nézõ lapok, GL_FRONT: a kamera felé nézõ lapok
+	//glCullFace(GL_BACK); // GL_BACK: a kamerától "elfelé" nézõ lapok, GL_FRONT: a kamera felé nézõ lapok
 
 	//
 	// geometria letrehozasa
@@ -30,16 +30,78 @@ bool CMyApp::Init()
 
 	Vertex vert[] =
 	{ 
+		//1. Négyzet - szemben
+		// 1. háromszög
+		//          x,  y, z             R, G, B
+		{glm::vec3(-1, -1, 2), glm::vec3(1, 0, 0)},
+		{glm::vec3( 1, -1, 2), glm::vec3(0, 1, 0)},
+		{glm::vec3(-1,  1, 2), glm::vec3(0, 0, 1)},
+
+		// 2. háromszög
+		{glm::vec3(-1,  1, 2), glm::vec3(0, 0, 1)},
+		{glm::vec3( 1, -1, 2), glm::vec3(0, 1, 0)},
+		{glm::vec3( 1,  1, 2), glm::vec3(1, 1, 1)},
+
+
+
+		//2. Négyzet - jobb oldali
+		// 1. háromszög
+		//          x,  y, z             R, G, B
+		{glm::vec3(1, 1, 2), glm::vec3(1, 0, 0)},
+		{glm::vec3(1, -1, 2), glm::vec3(0, 1, 0)},
+		{glm::vec3(1,  -1, 0), glm::vec3(0, 0, 1)},
+
+		// 2. háromszög
+		{glm::vec3(1,  1, 2), glm::vec3(0, 0, 1)},
+		{glm::vec3(1, -1, 0), glm::vec3(0, 1, 0)},
+		{glm::vec3(1,  1, 0), glm::vec3(1, 1, 1)},
+
+		//3. Négyzet - FELSõ
+		// 1. háromszög
+		//          x,  y, z             R, G, B
+		{glm::vec3(-1, 1, 2), glm::vec3(1, 0, 0)},
+		{glm::vec3(1, 1, 2), glm::vec3(0, 1, 0)},
+		{glm::vec3(1,  1, 0), glm::vec3(0, 0, 1)},
+
+		// 2. háromszög
+		{glm::vec3(-1,  1, 2), glm::vec3(0, 0, 1)},
+		{glm::vec3(1, 1, 0), glm::vec3(0, 1, 0)},
+		{glm::vec3(-1,  1, 0), glm::vec3(1, 1, 1)},
+
+		//4.  - ALSó
 		// 1. háromszög
 		//          x,  y, z             R, G, B
 		{glm::vec3(-1, -1, 0), glm::vec3(1, 0, 0)},
-		{glm::vec3( 1, -1, 0), glm::vec3(0, 1, 0)},
+		{glm::vec3(-1, -1, 2), glm::vec3(0, 1, 0)},
+		{glm::vec3(1,  -1, 2), glm::vec3(0, 0, 1)},
+
+		// 2. háromszög
+		{glm::vec3(-1,  -1, 0), glm::vec3(0, 0, 1)},
+		{glm::vec3(1, -1, 2), glm::vec3(0, 1, 0)},
+		{glm::vec3(1,  -1, 0), glm::vec3(1, 1, 1)},
+
+		//5. Négyzet - bal
+		// 1. háromszög
+		//          x,  y, z             R, G, B
+		{glm::vec3(-1, -1, 0), glm::vec3(1, 0, 0)},
+		{glm::vec3(-1, -1, 2), glm::vec3(0, 1, 0)},
 		{glm::vec3(-1,  1, 0), glm::vec3(0, 0, 1)},
 
 		// 2. háromszög
+		{glm::vec3(-1,  -1, 2), glm::vec3(0, 0, 1)},
+		{glm::vec3(-1, 1, 2), glm::vec3(0, 1, 0)},
+		{glm::vec3(-1,  1, 0), glm::vec3(1, 1, 1)},
+
+		//6. Négyzet - hatsó
+		//          x,  y, z             R, G, B
+		{glm::vec3(1, -1, 0), glm::vec3(0, 1, 0)},
+		{glm::vec3(-1, -1, 0), glm::vec3(1, 0, 0)},
 		{glm::vec3(-1,  1, 0), glm::vec3(0, 0, 1)},
-		{glm::vec3( 1, -1, 0), glm::vec3(0, 1, 0)},
-		{glm::vec3( 1,  1, 0), glm::vec3(1, 1, 1)},
+
+		// 2. háromszög
+		{glm::vec3(1, -1, 0), glm::vec3(0, 1, 0)},
+		{glm::vec3(-1,  1, 0), glm::vec3(0, 0, 1)},
+		{glm::vec3(1,  1, 0), glm::vec3(1, 1, 1)}
 	};
 
 	// 1 db VAO foglalasa
@@ -153,8 +215,9 @@ void CMyApp::Clean()
 void CMyApp::Update()
 {
 	// nézeti transzformáció beállítása
-	m_matView = glm::lookAt(glm::vec3( 0,  0,  5),		// honnan nézzük a színteret
-							glm::vec3( 0,  0,  0),		// a színtér melyik pontját nézzük
+	float time = SDL_GetTicks() / 1000.0;
+	m_matView = glm::lookAt(glm::vec3(5 * sinf(time)+5,  5*sinf(time), 5),		// honnan nézzük a színteret
+							glm::vec3( 0,  0,  1),		// a színtér melyik pontját nézzük
 							glm::vec3( 0,  1,  0));		// felfelé mutató irány a világban
 }
 
@@ -192,7 +255,7 @@ void CMyApp::Render()
 	// kirajzolás
 	glDrawArrays(	GL_TRIANGLES,	// rajzoljunk ki háromszöglista primitívet
 					0,				// a VB elsõ eleme legyen az elsõ kiolvasott vertex
-					6);				// és 6db csúcspont segítségével rajzoljunk háromszöglistát
+					36);				// és 6db csúcspont segítségével rajzoljunk háromszöglistát
 
 	// VAO kikapcsolasa
 	glBindVertexArray(0);
