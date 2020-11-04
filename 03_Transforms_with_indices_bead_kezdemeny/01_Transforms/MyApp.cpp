@@ -12,6 +12,7 @@ glm::vec3 getSphere(float u, float v) { // u 0, 1
 	return glm::vec3(r * cu * sv, r * cv, r * su * sv);
 }
 
+
 CMyApp::CMyApp(void)
 {
 	m_vaoID = 0;
@@ -30,6 +31,7 @@ CMyApp::CMyApp(void)
 	}
 }
 
+
 CMyApp::~CMyApp(void)
 {
 }
@@ -41,7 +43,7 @@ bool CMyApp::Init()
 
 	glEnable(GL_CULL_FACE); // kapcsoljuk be a hatrafele nezo lapok eldobasat
 	glEnable(GL_DEPTH_TEST); // mélységi teszt bekapcsolása (takarás)
-	glCullFace(GL_BACK); // GL_BACK: a kamerától "elfelé" nézõ lapok, GL_FRONT: a kamera felé nézõ lapok
+	//glCullFace(GL_BACK); // GL_BACK: a kamerától "elfelé" nézõ lapok, GL_FRONT: a kamera felé nézõ lapok
 
 	//
 	// geometria letrehozasa
@@ -358,20 +360,21 @@ void CMyApp::Render()
 	glDrawElements(GL_TRIANGLES, 180 , GL_UNSIGNED_SHORT, 0);*/
 
 	if (resize) {
-		sca = stop + (SDL_GetTicks() / 1000.0) - restart;
+		float tmp = stop + (SDL_GetTicks() / 1000.0) - restart;
+		sca = fabs(sinf(tmp)) * 1.5 + 0.5;
 	}
 
 	
 	for (int i = 0; i < 6; i++) {
 		m_matWorld =
 
-			//glm::rotate<float>(M_PI * time * 2 / 5, glm::vec3(1, 0, 0))* //FORGATÁS
-			glm::rotate<float>(time * 2 * M_PI / 5, glm::vec3(0, 1, 0)) * //Forgatok
-			glm::translate<float>(glm::vec3(9,0,0)) * //Eltolom 
-			glm::rotate<float>(time * 2 * M_PI / 5, glm::vec3(0, -1, 0))* //Ellenforgatok
+			//glm::rotate<float>(M_PI * time * 2 / 5, glm::vec3(0, 1, 0))* //FORGATÁS
+			//glm::rotate<float>(time * 2 * M_PI / 5, glm::vec3(0, 1, 0)) * //Forgatok
+			//glm::translate<float>(glm::vec3(9,0,0)) * //Eltolom 
+			//glm::rotate<float>(time * 2 * M_PI / 5, glm::vec3(0, -1, 0))* //Ellenforgatok
 			glm::translate<float>(getSphere(fabs(sin(randArray[i])), fabs(sin(randArray[i])))) *
 
-			glm::scale<float>(glm::vec3(fabs(sinf(sca)) * 1.5 + 0.5, 1, 1)) *
+			glm::scale<float>(glm::vec3(sca, 1, 1)) *
 			glm::translate<float>(glm::vec3(-0.5f, -0.5f, -0.5f)) ;  //origoba tol
 
 
@@ -414,8 +417,7 @@ void CMyApp::KeyboardDown(SDL_KeyboardEvent& key)
 
 	if (key.keysym.sym == SDLK_SPACE) {
 		if (!resize) {
-			resize = false;
-			stop = sca;
+			restart = SDL_GetTicks() / 1000.0;
 		}
 		resize = true;
 	}
@@ -429,10 +431,6 @@ void CMyApp::KeyboardUp(SDL_KeyboardEvent& key)
 		resize = false;
 		stop = sca;
 	}
-
-	
-
-
 }
 
 void CMyApp::MouseMove(SDL_MouseMotionEvent& mouse)
