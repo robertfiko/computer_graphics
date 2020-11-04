@@ -56,7 +56,7 @@ protected:
 
 	bool resize;
 
-	float restart, sca, stop;
+	float restart, sca, prevSca, scalar;
 
 	
 
