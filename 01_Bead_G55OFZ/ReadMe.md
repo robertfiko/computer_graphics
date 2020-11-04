@@ -1,5 +1,6 @@
 # Computer Graphics - First Small Assignemnt
 Task discription is only in Hungarian.
+
 **Summary:** X figures from unit-cubes, placed on the surface of a spehere, on a circle route on plane XZ.
 
 ![animation-of-task](https://github.com/robertfiko/computer_graphics/blob/master/01_Bead_G55OFZ/animation.gif)
