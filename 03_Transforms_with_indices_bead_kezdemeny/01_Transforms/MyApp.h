@@ -52,6 +52,12 @@ protected:
 	GLuint	m_loc_view;
 	GLuint	m_loc_proj;
 
+	int randArray[6];
+
+	bool resize;
+
+	float restart, sca, stop;
+
 	
 
 	struct Vertex
