@@ -12,17 +12,17 @@
 CMyApp::CMyApp(void)
 {
 	m_camera.SetView(glm::vec3(5, 5, 5), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
-	m_mesh = nullptr;
+	m_suzanneMesh = nullptr;
 }
 
 CMyApp::~CMyApp(void)
 {
-	std::cout << "dtor!\n";
+	std::cout << "Destructor!\n";
 }
 
+//Cube
 void CMyApp::InitCube()
 {
-	//struct Vertex{ glm::vec3 position; glm::vec3 normals; glm::vec2 texture; };
 	std::vector<Vertex>vertices;
 	
 	//front									 
@@ -69,24 +69,8 @@ void CMyApp::InitCube()
 		index += 6;
 	}
 
-	//
-	// geometria definiálása (std::vector<...>) és GPU pufferekbe való feltöltése BufferData-val
-	//
-
-	// vertexek pozíciói:
-	/*
-	Az m_CubeVertexBuffer konstruktora már létrehozott egy GPU puffer azonosítót és a most következõ BufferData hívás ezt
-	1. bind-olni fogja GL_ARRAY_BUFFER target-re (hiszen m_CubeVertexBuffer típusa ArrayBuffer) és
-	2. glBufferData segítségével áttölti a GPU-ra az argumentumban adott tároló értékeit
-
-	*/
-
 	m_CubeVertexBuffer.BufferData(vertices);
-
-	// és a primitíveket alkotó csúcspontok indexei (az elõzõ tömbökbõl) - triangle list-el való kirajzolásra felkészülve
 	m_CubeIndices.BufferData(indices);
-
-	// geometria VAO-ban való regisztrálása
 	m_CubeVao.Init(
 		{
 			// 0-ás attribútum "lényegében" glm::vec3-ak sorozata és az adatok az m_CubeVertexBuffer GPU pufferben vannak
@@ -102,19 +86,21 @@ void CMyApp::InitCube()
 	);
 }
 
-glm::vec3 CMyApp::GetPos(float u, float v)
+
+
+//Plane
+glm::vec3 CMyApp::GetPosPlane(float u, float v)
 {
 	return glm::vec3(u, sin(u * 10), -v);
 }
 
-glm::vec3 CMyApp::GetNorm(float u, float v)
+glm::vec3 CMyApp::GetNormPlane(float u, float v)
 {
-	glm::vec3 du = GetPos(u + 0.01, v) - GetPos(u - 0.01, v);
-	glm::vec3 dv = GetPos(u, v + 0.01) - GetPos(u, v - 0.01);
+	glm::vec3 du = GetPosPlane(u + 0.01, v) - GetPosPlane(u - 0.01, v);
+	glm::vec3 dv = GetPosPlane(u, v + 0.01) - GetPosPlane(u, v - 0.01);
 
 	return glm::normalize(glm::cross(du, dv));
 }
-
 
 void CMyApp::InitPlane()
 {
@@ -126,8 +112,8 @@ void CMyApp::InitPlane()
 			float v = j / (float)M;
 
 			vert[i + j * (N + 1)].t = glm::vec2(u, v);
-			vert[i + j * (N + 1)].p = GetPos(u, v);
-			vert[i + j * (N + 1)].n = GetNorm(u, v);
+			vert[i + j * (N + 1)].p = GetPosPlane(u, v);
+			vert[i + j * (N + 1)].n = GetNormPlane(u, v);
 		}
 
 	std::vector<int> indices(3 * 2 * (N) * (M));
@@ -160,6 +146,8 @@ void CMyApp::InitPlane()
 }
 
 
+
+//Sphere
 glm::vec3 CMyApp::GetSpherePos(float u, float v)
 {
 	u *= float(2 * M_PI);
@@ -178,8 +166,6 @@ glm::vec3 CMyApp::GetSphereNorm(float u, float v)
 
 	return glm::vec3(cu * sv, cv, su * sv);
 }
-
-
 
 void CMyApp::InitSphere()
 {
@@ -225,6 +211,8 @@ void CMyApp::InitSphere()
 }
 
 
+
+//Skybox
 void CMyApp::InitSkyBox()
 {
 	m_SkyboxPos.BufferData(
@@ -307,7 +295,8 @@ void CMyApp::InitBackground()
 			{glm::vec3(-1, 1, -1),},
 			// elülsõ lap		 
 			{glm::vec3(-1, -1, 1),},
-			{glm::vec3(1, -1, 1), },
+			{glm::vec
+			3(1, -1, 1), },
 			{glm::vec3(1, 1, 1),  },
 			{glm::vec3(-1, 1, 1), },
 	}
@@ -370,9 +359,9 @@ bool CMyApp::Init()
 	m_suzanneTexture.FromFile("assets/marron.jpg");
 	m_grassTexture.FromFile("assets/grass.jpg");
 
-	// mesh betoltese
-	m_mesh = ObjParser::parse("assets/Suzanne.obj");
-	m_mesh->initBuffers();
+	// suzanne mesh betoltese
+	m_suzanneMesh = ObjParser::parse("assets/Suzanne.obj");
+	m_suzanneMesh->initBuffers();
 
 	m_cylinderMesh = ObjParser::parse("assets/henger.obj");
 	m_cylinderMesh->initBuffers();
@@ -402,7 +391,7 @@ void CMyApp::Clean()
 {
 	glDeleteTextures(1, &m_skyboxTexture);
 
-	delete m_mesh;
+	delete m_suzanneMesh;
 }
 
 void CMyApp::Update()
@@ -416,30 +405,37 @@ void CMyApp::Update()
 	last_time = SDL_GetTicks();
 }
 
-void CMyApp::DrawTree(glm::mat4& treeWorld)
+void CMyApp::DrawSphere(glm::mat4& world, ProgramObject& program)
 {
-	m_program.Use();
+	program.Use();
 	glm::mat4 viewProj = m_camera.GetViewProj();
 
-
 	m_SphereVao.Bind();
-	glm::mat4 sphereWorld = treeWorld * glm::translate(glm::vec3(0, 4, 0));
+	glm::mat4 sphereWorld = world * glm::translate(glm::vec3(0, 4, 0));
 	m_program.SetUniform("MVP", viewProj * sphereWorld);
 	m_program.SetUniform("world", sphereWorld);
 	m_program.SetUniform("worldIT", glm::inverse(glm::transpose(sphereWorld)));
 
 	glDrawElements(GL_TRIANGLES, 3 * 2 * (N) * (M), GL_UNSIGNED_INT, 0);
+	program.Unuse();
 
 
-	glm::mat4 cylinderWorld = treeWorld * glm::translate(glm::vec3(0, 2, 0));
-	m_program.SetUniform("MVP", viewProj * cylinderWorld);
-	m_program.SetUniform("world", cylinderWorld);
-	m_program.SetUniform("worldIT", glm::inverse(glm::transpose(cylinderWorld)));
+}
 
-	m_cylinderMesh->draw();
+void CMyApp::DrawMesh(Mesh* mesh, Texture2D& texture, ProgramObject& program, glm::mat4 meshWorld = glm::mat4(1.0f)) {
+	glm::mat4 viewProj = m_camera.GetViewProj();
 
-	m_program.Unuse();
+	program.Use();
+	m_program.SetTexture("texImage", 0, texture);
+	m_program.SetUniform("MVP", viewProj * meshWorld);
+	m_program.SetUniform("world", meshWorld);
+	m_program.SetUniform("worldIT", glm::inverse(glm::transpose(meshWorld)));
 
+	m_program.SetCubeTexture("texSkybox", 1, m_skyboxTexture);
+	m_program.SetUniform("eye_pos", m_camera.GetEye());
+
+	mesh->draw();
+	program.Unuse();
 }
 
 void CMyApp::Render()
@@ -449,20 +445,11 @@ void CMyApp::Render()
 
 	glm::mat4 viewProj = m_camera.GetViewProj();
 
-	//Suzanne
-	glm::mat4 suzanneWorld = glm::mat4(1.0f);
+	//Suzannec = MESH Objektum kirajzolása
+	DrawMesh(m_suzanneMesh, m_suzanneTexture, m_program);
+
+
 	m_program.Use();
-	m_program.SetTexture("texImage", 0, m_suzanneTexture);
-	m_program.SetUniform("MVP", viewProj * suzanneWorld);
-	m_program.SetUniform("world", suzanneWorld);
-	m_program.SetUniform("worldIT", glm::inverse(glm::transpose(suzanneWorld)));
-
-	m_program.SetCubeTexture("texSkybox", 1, m_skyboxTexture);
-	m_program.SetUniform("camPos", m_camera.GetEye());
-
-	m_mesh->draw();
-
-
 	m_PlaneVao.Bind();
 	glm::mat4 planeWorld = glm::translate(glm::vec3(-10, 0, 10)) * glm::scale(glm::vec3(20, 1, 20));
 	m_program.SetUniform("MVP", viewProj * planeWorld);
@@ -471,31 +458,11 @@ void CMyApp::Render()
 	m_program.SetTexture("texImage", 0, m_grassTexture);
 
 	glDrawElements(GL_TRIANGLES, 3 * 2 * (N) * (M), GL_UNSIGNED_INT, 0);
-
 	
 
-	// fak
-
-	for (int i = 0; i < 20; i++)
-	{
-		for (int j = 0; j < 20; j++)
-		{
-			if (trees[i][j] > 0)
-			{
-				float u = i / (float)20;
-				float v = j / (float)20;
-
-				glm::vec3 treePos = glm::translate(glm::vec3(-10, 0, 10)) * glm::scale(glm::vec3(20, 1, 20)) * glm::vec4(GetPos(u, v), 1);              
-
-				DrawTree( glm::translate(treePos) * glm::scale(glm::vec3(trees[i][j], trees[i][j], trees[i][j])));
-			}
-		}
-	}
-
+	DrawSphere(glm::translate(glm::vec3(1,1,1)), m_program);
 
 	
-
-
 
 	// kockák
 	m_program.Use();
@@ -546,11 +513,29 @@ void CMyApp::Render()
 	glDepthFunc(prevDepthFnc);
 
 
-	// 1. feladat: készíts egy vertex shader-fragment shader párt, ami tárolt geometria _nélkül_ kirajzol egy tetszõleges pozícióba egy XYZ tengely-hármast,
-	//			   ahol az X piros, az Y zöld a Z pedig kék!
+
 
 	//ImGui Testwindow
 	ImGui::ShowTestWindow();
+
+
+	//My Imgui
+	
+	ImGui::SetNextWindowPos(ImVec2(300, 400), ImGuiSetCond_FirstUseEver);
+	if (ImGui::Begin("title"))
+	{
+		ImGui::Text("subtitle");
+		ImGui::SliderFloat("text", &(value), 1.0f, 40);
+
+		ImGui::Checkbox("text2", &b);
+
+		if (ImGui::Button("Btn text")) {
+			//Ha megnyomják
+			value++;
+		}
+	}
+	ImGui::End();
+
 }
 
 void CMyApp::KeyboardDown(SDL_KeyboardEvent& key)
